@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
+block body %}
+
+<h1>{{ thread.title }}</h1>
+
+<p>
+  Posted by
+  <a
+    class="no-hover-link"
+    href="{{ path('profile.public', { id: thread.author.id }) }}"
+  >
+    {{ thread.author.username }}
+  </a>
+  on
+  {{ thread.createdAt|date('M. d Y') }}
+  {% if thread.createdAt != thread.updatedAt and thread.updatedAt != null %}
+  {{ thread.updatedAt|date('M. d Y H:m') }}
+  {% endif %}
+</p>
+
+<div class="d-flex gap-2 mb-4 mt-2">
+  {% for category in thread.categories %}
+  <span class="badge bg-info text-white badge-info">{{ category.name }}</span>
+  {% endfor %}
+</div>
+
+<p>
+  Status:
+  <span class="text-info">
+    {{ thread.status }}
+  </span>
+</p>
+
+<p class="mb-4">Description: {{ thread.description | nl2br }}</p>
+<h2>Content:</h2>
+<p class="mb-4">
+  {{ thread.description | nl2br }}
+</p>
+
+<div>
+  {% if thread.comments and thread.comments|length > 0 %} {% for comment in
+  thread.comments %} {% if comment.isSolution == true %}
+  <h3 class="text-success">Solution</h3>
+  <div class="border p-4 m-4 bg-success text-white">
+    <p>{{ comment.user.username }} commented:</p>
+    <p>
+      {{ comment.content | nl2br }}
+    </p>
+  </div>
+  {% endif %} {% endfor %}
+
+  <h4>Comments:</h4>
+  {% for comment in thread.comments %} {% if comment.isSolution != true %}
+  <div class="border p-4 m-4">
+    <p>{{ comment.user.username }} commented:</p>
+    <p>
+      {{ comment.content | nl2br }}
+    </p>
+  </div>
+  {% endif %} {% endfor %} {% else %}
+  <h2>0 comments posted:</h2>
+  {% endif %}
+</div>
+{% endblock %}

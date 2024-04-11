@@ -3,8 +3,12 @@
 namespace App\Entity;
 
 use App\Repository\ThreadRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: ThreadRepository::class)]
 class Thread
@@ -14,10 +18,8 @@ class Thread
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $author = null;
-
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(length: 7)]
+    #[Assert\Regex('/^(open|closed|blocked)$/i')]
     private ?string $status = null;
 
     #[ORM\Column(length: 100)]
@@ -29,30 +31,38 @@ class Thread
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $catogories = null;
-
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'threads')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $author = null;
+
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'threads')]
+    private Collection $categories;
+
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'thread', orphanRemoval: true)]
+    private Collection $comments;
+
+    public function __construct()
+    {
+        $this->categories = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->status = 'open';
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getAuthor(): ?string
-    {
-        return $this->author;
-    }
-
-    public function setAuthor(string $author): static
-    {
-        $this->author = $author;
-
-        return $this;
     }
 
     public function getStatus(): ?string
@@ -103,18 +113,6 @@ class Thread
         return $this;
     }
 
-    public function getCatogories(): ?string
-    {
-        return $this->catogories;
-    }
-
-    public function setCatogories(?string $catogories): static
-    {
-        $this->catogories = $catogories;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -137,5 +135,98 @@ class Thread
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): static
+    {
+        $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): static
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): static
+    {
+        $this->categories->removeElement($category);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setThread($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            // set the owning side to null (unless already changed)
+            if ($comment->getThread() === $this) {
+                $comment->setThread(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Marque le commentaire comme solution au Thread si il est présent dans la liste des commentaires sur l'entité. 
+     */
+    public function markCommentAsSolution(Comment $comment): void
+    {
+        if (!$this->comments->contains($comment)) {
+            throw new \InvalidArgumentException('The comment does not exists in this thread');
+        }
+
+        $comment->setSolution(true);
+
+        $this->setStatus('closed');
+    }
+
+    /**
+     * @return Comment|null La solution a un Thread si elle existe ou null
+     */
+    public function getSolution(): ?Comment
+    {
+        foreach ($this->comments as $comment) {
+            if ($comment->isSolution()) {
+                return $comment;
+            }
+        }
+        return null;
     }
 }

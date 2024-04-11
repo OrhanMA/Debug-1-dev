@@ -6,14 +6,27 @@ block body %} {% include "partials/flash.html.twig" %}
 {{ form_start(form) }}
 {{ form_row(form.username) }}
 {{ form_row(form.email) }}
-<button class="btn btn-primary" type="submit">Save</button>
+<button class="btn btn-primary" type="submit">Save infos</button>
 {{ form_end(form) }}
+
+{{ form_start(passwordForm) }}
+{{ form_row(passwordForm.password) }}
+{{ form_row(passwordForm.newPassword) }}
+<button class="btn btn-primary" type="submit">Save new password</button>
+{{ form_end(passwordForm) }}
+
 <div class="d-inline-block">
   <div class="alert alert-light d-flex gap-2 mt-4" role="alert">
     {% if user.createdAt != user.updatedAt %}
-    <p>Last modified the {{ user.updatedAt|date('Y/m/d') }}</p>
+    <p>Last modified: {{ user.updatedAt|date('Y/m/d') }}</p>
     {% endif %}
-    <p>Account creation {{ user.createdAt|date('Y/m/d') }}</p>
+    <p>created: {{ user.createdAt|date('Y/m/d') }}</p>
   </div>
+</div>
+
+<div>
+  <a class="btn btn-danger" href="{{ path('profile.delete') }}"
+    >Delete my account</a
+  >
 </div>
 {% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html.twig" %} {% block title %}Account deletion{% endblock %}
+{% block body %}
+
+<h1>Delete my account</h1>
+
+<h2 class="text-danger">
+  Are you sure that you want to delete your account? <br />
+  That action is destructive and your data can't be retrieved afterwards.
+</h2>
+
+<p>Type your password to delete your account:</p>
+{{ form_start(deleteForm) }}
+{{ form_row(deleteForm.password) }}
+{{ form_row(deleteForm.passwordConfirm) }}
+<button type="submit" class="btn btn-danger">Delete my account</button>
+{{ form_end(deleteForm) }}
+{% endblock %}

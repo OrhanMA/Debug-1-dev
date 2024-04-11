@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %} {% block title %} {{ user.username }}'s profile
+{% endblock %}{% block body %} {% include "partials/flash.html.twig" %}
+<h1>{{ user.username }}'s profile</h1>
+<div class="d-inline-block">
+  <div class="alert alert-light d-flex gap-2 mt-4" role="alert">
+    <p>Member since: {{ user.createdAt|date('M. Y') }}</p>
+  </div>
+</div>
+
+<div>
+  {% if user.threads and user.threads|length > 0 %}
+  <h2>Threads posted:</h2>
+  {% for thread in user.threads %}
+  <a
+    class="text-dark no-hover-link"
+    href="{{ path('threads.show', { id: thread.id }) }}"
+  >
+    <div class="border p-4 m-4">
+      <h4>{{ thread.title }}</h4>
+      <div class="d-flex gap-2 mb-2">
+        {% for category in thread.categories %}
+        <span class="badge bg-info text-white badge-info">{{
+          category.name
+        }}</span>
+        {% endfor %}
+      </div>
+      <p class="d-inline-block text-truncate">{{ thread.description }}</p>
+      <p>posted on {{ thread.createdAt|date('M. d Y') }}</p>
+    </div>
+  </a>
+  {% endfor %} {% else %}
+  <h2>0 threads posted.</h2>
+  {% endif %}
+</div>
+<div>
+  {% if user.comments and user.comments|length > 0 %}
+  <h2>Comments posted:</h2>
+  {% for comment in user.comments %}
+  <div class="border p-4 m-4">
+    <p class="text-truncate mb-4">
+      On the post:
+      <a
+        href="{{ path('threads.show', { id: comment.thread.id }) }}"
+        class="no-hover-link"
+      >
+        <b>
+          {{ comment.thread.title }}
+        </b>
+      </a>
+    </p>
+    <p>{{ user.username }} commented:</p>
+    <p>
+      {{ comment.content | nl2br }}
+    </p>
+    <a
+      href="{{ path('threads.show', { id: comment.thread.id }) }}"
+      class="btn btn-primary btn-sm mt-2"
+      >see original post
+    </a>
+  </div>
+  {% endfor %} {% else %}
+  <h2>0 comments posted:</h2>
+  {% endif %}
+</div>
+{% endblock %}
