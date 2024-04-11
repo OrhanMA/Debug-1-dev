@@ -1,0 +1,14 @@
+<nav class="navbar bg-body-tertiary p-3">
+  <a class="navbar-brand" href="{{ path('threads') }}">Threads</a>
+  <a class="nav-link active" href="{{ path('threads') }}">Threads</a>
+  <div class="d-flex gap-3">
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    <a class="nav-link" href="{{ path('profile') }}">Profile</a>
+    <a class="nav-link" href="{{ path('logout') }}">Logout</a>
+    {% else %} {% if app.request.requesturi != "/signin" %}
+    <a class="nav-link" href="{{ path('signin') }}">Sign in</a>
+    {% endif %} {% if app.request.requesturi != "/signup" %}
+    <a class="nav-link" href="{{ path('signup') }}">Sign up</a>
+    {% endif %} {% endif %}
+  </div>
+</nav>
