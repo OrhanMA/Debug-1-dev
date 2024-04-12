@@ -2,7 +2,8 @@
 block body %} {% include "partials/flash.html.twig" %}
 
 <h1>{{ thread.title }}</h1>
-{% if thread.author.id == app.user.id %}
+{% if is_granted('IS_AUTHENTICATED_FULLY') and thread.author.id == app.user.id
+%}
 <div class="mb-4">
   <a
     class="btn btn-primary btn-sm"
@@ -16,6 +17,7 @@ block body %} {% include "partials/flash.html.twig" %}
   >
 </div>
 {% endif %}
+
 <p>
   Posted by
   <a
@@ -50,6 +52,7 @@ block body %} {% include "partials/flash.html.twig" %}
   {{ thread.content | nl2br }}
 </p>
 
+{% if is_granted('IS_AUTHENTICATED_FULLY') %}
 <div class="mb-2">
   <h4>Post a comment</h4>
   {{ form_start(form) }}
@@ -57,6 +60,7 @@ block body %} {% include "partials/flash.html.twig" %}
   <button type="submit" class="btn btn-primary">Send</button>
   {{ form_end(form) }}
 </div>
+{% endif %}
 
 <div>
   {% if thread.comments and thread.comments|length > 0 %} {% for comment in

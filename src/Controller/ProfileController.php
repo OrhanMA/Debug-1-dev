@@ -189,7 +189,19 @@ class ProfileController extends AbstractController
     public function editThread(Request $request, int $id, ThreadRepository $threadRepository, EntityManagerInterface $em,  HtmlSanitizerInterface $htmlSanitizer): Response
     {
 
+
         $thread = $threadRepository->find($id);
+        if (!$thread) {
+            $this->addFlash('danger', 'The ressource requested does not exists');
+            return $this->redirectToRoute('profile.threads');
+        }
+
+        /** @var User */
+        $user = $this->getUser();
+        if ($thread->getAuthor()->getId() !== $user->getId()) {
+            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+            return $this->redirectToRoute('threads');
+        }
         $form = $this->createForm(ThreadType::class, $thread);
 
         $form->handleRequest($request);
@@ -225,6 +237,19 @@ class ProfileController extends AbstractController
     {
 
         $thread = $threadRepository->find($id);
+
+        if (!$thread) {
+            $this->addFlash('danger', 'The ressource requested does not exists');
+            return $this->redirectToRoute('profile.threads');
+        }
+
+        /** @var User */
+        $user = $this->getUser();
+        if ($thread->getAuthor()->getId() !== $user->getId()) {
+            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+            return $this->redirectToRoute('threads');
+        }
+
         $form = $this->createForm(DeleteThreadType::class);
         $form->handleRequest($request);
 
@@ -274,6 +299,17 @@ class ProfileController extends AbstractController
     {
 
         $comment = $commentRepository->find($id);
+        if (!$comment) {
+            $this->addFlash('danger', 'The ressource requested does not exists');
+            return $this->redirectToRoute('profile.comments');
+        }
+
+        /** @var User */
+        $user = $this->getUser();
+        if ($comment->getUser()->getId() !== $user->getId()) {
+            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+            return $this->redirectToRoute('threads');
+        }
         $form = $this->createForm(CommentType::class, $comment);
 
         $form->handleRequest($request);
@@ -303,6 +339,16 @@ class ProfileController extends AbstractController
     {
 
         $comment = $commentRepository->find($id);
+        if (!$comment) {
+            $this->addFlash('danger', 'The ressource requested does not exists');
+            return $this->redirectToRoute('profile.comments');
+        }
+        /** @var User */
+        $user = $this->getUser();
+        if ($comment->getUser()->getId() !== $user->getId()) {
+            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+            return $this->redirectToRoute('threads');
+        }
         $form = $this->createForm(DeleteCommentType::class);
         $form->handleRequest($request);
 

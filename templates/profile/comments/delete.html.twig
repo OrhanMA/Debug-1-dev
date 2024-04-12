@@ -5,7 +5,7 @@ block body %} {% include "partials/flash.html.twig" %}
 
 <div class="mb-4">
   <p>Comment:</p>
-  <p>{{ comment.content }}</p>
+  <p>{{ comment.content | nl2br }}</p>
 </div>
 
 <p class="text-danger">
