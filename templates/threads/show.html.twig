@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
-block body %}
+block body %} {% include "partials/flash.html.twig" %}
 
 <h1>{{ thread.title }}</h1>
 {% if thread.author.id == app.user.id %}
@@ -46,9 +46,17 @@ block body %}
 
 <p class="mb-4">Description: {{ thread.description | nl2br }}</p>
 <h2>Content:</h2>
-<p class="mb-4">
+<p class="mb-5">
   {{ thread.content | nl2br }}
 </p>
+
+<div class="mb-2">
+  <h4>Post a comment</h4>
+  {{ form_start(form) }}
+  {{ form_row(form.content) }}
+  <button type="submit" class="btn btn-primary">Send</button>
+  {{ form_end(form) }}
+</div>
 
 <div>
   {% if thread.comments and thread.comments|length > 0 %} {% for comment in
@@ -65,13 +73,35 @@ block body %}
   <h4>Comments:</h4>
   {% for comment in thread.comments %} {% if comment.isSolution != true %}
   <div class="border p-4 m-4">
-    <p>{{ comment.user.username }} commented:</p>
+    <h5>
+      <a
+        class="no-hover-link"
+        href="{{ path('profile.public', { id: comment.user.id }) }}"
+      >
+        {{ comment.user.username }}
+      </a>
+      commented:
+    </h5>
     <p>
       {{ comment.content | nl2br }}
     </p>
+    {% if comment.user.id == app.user.id %}
+    <div class="mt-2">
+      <a
+        class="btn btn-primary btn-sm"
+        href="{{ path('comments.edit', { id: comment.id }) }}"
+        >Edit</a
+      >
+      <a
+        class="btn btn-danger btn-sm"
+        href="{{ path('comments.delete', { id: comment.id }) }}"
+        >Delete</a
+      >
+    </div>
+    {% endif %}
   </div>
   {% endif %} {% endfor %} {% else %}
-  <h2>0 comments posted:</h2>
+  <h4>0 comments posted:</h4>
   {% endif %}
 </div>
 {% endblock %}

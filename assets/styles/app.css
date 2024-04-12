@@ -25,3 +25,7 @@ form {
 #thread_content {
   min-height: 300px;
 }
+
+#comment_content {
+  min-height: 150px;
+}

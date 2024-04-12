@@ -6,11 +6,14 @@ use Exception;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Form\ThreadType;
+use App\Form\CommentType;
 use App\Form\NewPasswordType;
 use App\Form\DeleteThreadType;
+use App\Form\DeleteCommentType;
 use App\Form\PasswordConfirmType;
 use App\Repository\UserRepository;
 use App\Repository\ThreadRepository;
+use App\Repository\CommentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -264,5 +267,65 @@ class ProfileController extends AbstractController
     public function comments()
     {
         return $this->render('profile/comments/index.html.twig');
+    }
+
+    #[Route('/profile/comment/{id}/edit', name: "comments.edit", requirements: ['id' => '\d+'])]
+    public function editComment(Request $request, int $id, CommentRepository $commentRepository, EntityManagerInterface $em,  HtmlSanitizerInterface $htmlSanitizer): Response
+    {
+
+        $comment = $commentRepository->find($id);
+        $form = $this->createForm(CommentType::class, $comment);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment->setUpdatedAt(new \DateTimeImmutable());
+            $sanitizedContent =  $htmlSanitizer->sanitize($form->get('content')->getData());
+            $comment->setContent($sanitizedContent);
+
+            $em->persist($comment);
+            $em->flush();
+
+            $this->addFlash('success', 'Comment successfully updated');
+
+            return $this->redirectToRoute('profile.comments');
+        }
+
+        return $this->render('profile/comments/edit.html.twig', [
+            'comment' => $comment,
+            'form' => $form
+        ]);
+    }
+
+
+    #[Route('/profile/comment/{id}/delete', name: "comments.delete", requirements: ['id' => '\d+'])]
+    public function deleteComment(Request $request, int $id, CommentRepository $commentRepository, EntityManagerInterface $em): Response
+    {
+
+        $comment = $commentRepository->find($id);
+        $form = $this->createForm(DeleteCommentType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $confirmation = $form->get('confirmation')->getData();
+
+            if ($confirmation !== "Yes, delete my comment") {
+                $this->addFlash('danger', 'Please enter the correct sentence to confirm the deletion of the comment');
+                return $this->redirectToRoute("comments.delete", ['id' => $comment->getId()]);
+            }
+
+            $em->remove($comment);
+            $em->flush();
+
+            $this->addFlash('success', 'Comment successfully deleted');
+
+            return $this->redirectToRoute('profile.comments');
+        }
+
+        return $this->render('profile/comments/delete.html.twig', [
+            'comment' => $comment,
+            'form' => $form
+        ]);
     }
 }

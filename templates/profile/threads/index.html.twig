@@ -1,9 +1,9 @@
-{% extends 'base.html.twig' %} {% block title %} My profile {% endblock %}{%
-block body %} {% include "partials/flash.html.twig" %}
-
-<h1>My threads</h1>
+{% extends 'base.html.twig' %} {% block title %} My threads {% endblock %}{%
+block body %} {% include "partials/flash.html.twig" %} {% if
+app.user.threads|length > 0 %}
 
 <div>
+  <h1>My threads</h1>
   {% for thread in app.user.threads %}
   <a
     class="text-dark no-hover-link"
@@ -24,4 +24,10 @@ block body %} {% include "partials/flash.html.twig" %}
   </a>
   {% endfor %}
 </div>
-{% endblock %}
+{% else %}
+<h1>No threads posted yet</h1>
+<a class="btn btn-primary" href="{{ path('threads.create') }}"
+  >Create a thread</a
+>
+<a class="btn btn-secondary" href="{{ path('threads') }}">See threads</a>
+{% endif %} {% endblock %}

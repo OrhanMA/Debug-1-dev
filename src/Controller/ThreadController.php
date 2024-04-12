@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\Thread;
+use App\Form\CommentType;
 use App\Form\ThreadType;
 use App\Repository\ThreadRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,12 +32,40 @@ class ThreadController extends AbstractController
 
 
     #[Route('/threads/{id}', name: 'threads.show', requirements: ['id' => '\d+'])]
-    public function show(int $id, ThreadRepository $threadRepository): Response
+    public function show(int $id, ThreadRepository $threadRepository, Request $request, EntityManagerInterface $em, HtmlSanitizerInterface $htmlSanitizer): Response
     {
         $thread = $threadRepository->find($id);
 
+        $form = $this->createForm(CommentType::class);
+        $form->handleRequest($request);
+
+        $comment = new Comment();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $content = $form->get('content')->getData();
+            $sanitizedContent = $htmlSanitizer->sanitize($content);
+
+            try {
+                $comment->setContent($sanitizedContent);
+                $comment->setCreatedAt(new \DateTimeImmutable());
+                $comment->setSolution(false);
+                $comment->setThread($thread);
+                $comment->setUser($this->getUser());
+
+                $em->persist($comment);
+                $em->flush();
+
+                $this->addFlash('success', 'Comment posted successfully!');
+            } catch (\Throwable $th) {
+                $this->addFlash('danger', 'Error posting the comment. Please try again');
+            } finally {
+                return $this->redirectToRoute('threads.show', ['id' => $id]);
+            }
+        }
+
         return $this->render('threads/show.html.twig', [
-            'thread' => $thread
+            'thread' => $thread,
+            'form' => $form
         ]);
     }
 
