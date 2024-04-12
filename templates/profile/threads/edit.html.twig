@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
+block body %} {% include "partials/flash.html.twig" %}
+
+<h1>Edit thread</h1>
+
+{{ form_start(form) }}
+{{ form_rest(form) }}
+<button type="submit" class="btn btn-primary">Save</button>
+{{ form_end(form) }}
+{% endblock %}

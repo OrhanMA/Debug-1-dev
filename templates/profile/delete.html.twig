@@ -1,12 +1,12 @@
 {% extends "base.html.twig" %} {% block title %}Account deletion{% endblock %}
-{% block body %}
+{% block body %} {% include "partials/flash.html.twig" %}
 
 <h1>Delete my account</h1>
 
-<h2 class="text-danger">
+<p class="text-danger mb-4">
   Are you sure that you want to delete your account? <br />
   That action is destructive and your data can't be retrieved afterwards.
-</h2>
+</p>
 
 <p>Type your password to delete your account:</p>
 {{ form_start(deleteForm) }}

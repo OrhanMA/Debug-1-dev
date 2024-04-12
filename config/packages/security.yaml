@@ -42,10 +42,11 @@ security:
   access_control:
     - { path: ^/admin, roles: ROLE_ADMIN }
     - { path: ^/profile, roles: ROLE_USER }
-    - { path: ^/threads/(update|show|delete)/\d+$, roles: ROLE_USER }
+    # - { path: ^/threads/(update|show|delete)/\d+$, roles: ROLE_USER }
     - { path: ^/threads/create, roles: ROLE_USER }
   role_hierarchy:
     ROLE_ADMIN: ROLE_USER
+    # Les users avec ROLE_ADMIN héritent automatiquement des autorisations ROLE_USER (ils ont donc 2 rôles)
 
 when@test:
   security:

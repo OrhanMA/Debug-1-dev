@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %} {% block title %} My profile {% endblock %}{%
+block body %} {% include "partials/flash.html.twig" %}
+
+<h1>My threads</h1>
+
+<div>
+  {% for thread in app.user.threads %}
+  <a
+    class="text-dark no-hover-link"
+    href="{{ path('threads.show', { id: thread.id }) }}"
+  >
+    <div class="border p-4 m-4">
+      <h4>{{ thread.title }}</h4>
+      <div class="d-flex gap-2 mb-2">
+        {% for category in thread.categories %}
+        <span class="badge bg-info text-white badge-info">{{
+          category.name
+        }}</span>
+        {% endfor %}
+      </div>
+      <p class="d-inline-block text-truncate">{{ thread.description }}</p>
+      <p>posted on {{ thread.createdAt|date('M. d Y') }}</p>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

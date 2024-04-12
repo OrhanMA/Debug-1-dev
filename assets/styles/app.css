@@ -21,3 +21,7 @@ form {
 .no-hover-link:hover {
   text-decoration: none;
 }
+
+#thread_content {
+  min-height: 300px;
+}

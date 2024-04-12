@@ -3,4 +3,12 @@
 
 <h1>Create a thread</h1>
 
+{{ form_start(form) }}
+{{ form_row(form.title) }}
+{{ form_row(form.description) }}
+{{ form_row(form.content) }}
+{{ form_row(form.categories) }}
+<button type="submit" class="btn btn-primary">Create</button>
+{{ form_end(form) }}
+
 {% endblock %}

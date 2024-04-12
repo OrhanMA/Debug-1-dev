@@ -43,9 +43,7 @@ class SecurityController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
-
-            return $this->redirectToRoute('threads');
+            return $this->redirectToRoute('signin');
         }
 
         return $this->render('security/signup.html.twig', [

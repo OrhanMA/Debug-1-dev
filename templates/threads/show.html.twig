@@ -2,7 +2,20 @@
 block body %}
 
 <h1>{{ thread.title }}</h1>
-
+{% if thread.author.id == app.user.id %}
+<div class="mb-4">
+  <a
+    class="btn btn-primary btn-sm"
+    href="{{ path('threads.edit', { id: thread.id }) }}"
+    >Edit thread</a
+  >
+  <a
+    class="btn btn-danger btn-sm"
+    href="{{ path('threads.delete', { id: thread.id }) }}"
+    >Delete thread</a
+  >
+</div>
+{% endif %}
 <p>
   Posted by
   <a
@@ -34,7 +47,7 @@ block body %}
 <p class="mb-4">Description: {{ thread.description | nl2br }}</p>
 <h2>Content:</h2>
 <p class="mb-4">
-  {{ thread.description | nl2br }}
+  {{ thread.content | nl2br }}
 </p>
 
 <div>

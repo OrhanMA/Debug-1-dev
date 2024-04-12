@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %} {% block title %} My profile {% endblock %}{%
+block body %} {% include "partials/flash.html.twig" %} {% for comment in
+app.user.comments %}
+<div class="border p-4 m-4">
+  <p class="text-truncate mb-4">
+    On the post:
+    <a
+      href="{{ path('threads.show', { id: comment.thread.id }) }}"
+      class="no-hover-link"
+    >
+      <b>
+        {{ comment.thread.title }}
+      </b>
+    </a>
+  </p>
+  <p>you answered:</p>
+  <p>
+    {{ comment.content | nl2br }}
+  </p>
+  <a
+    href="{{ path('threads.show', { id: comment.thread.id }) }}"
+    class="btn btn-primary btn-sm mt-2"
+    >see original post
+  </a>
+  {% if comment.isSolution %}
+  <div class="alert alert-success mt-4">
+    <p>Your answer was declared as the solution. Congrats!</p>
+  </div>
+  {% endif %}
+</div>
+{% endfor %} {% endblock %}

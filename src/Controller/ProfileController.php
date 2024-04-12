@@ -5,16 +5,20 @@ namespace App\Controller;
 use Exception;
 use App\Entity\User;
 use App\Form\UserType;
+use App\Form\ThreadType;
 use App\Form\NewPasswordType;
+use App\Form\DeleteThreadType;
 use App\Form\PasswordConfirmType;
 use App\Repository\UserRepository;
+use App\Repository\ThreadRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class ProfileController extends AbstractController
 {
@@ -55,7 +59,6 @@ class ProfileController extends AbstractController
                     'success',
                     'Password updated!'
                 );
-                return $this->redirectToRoute('profile');
             } catch (Exception $e) {
                 throw $e;
                 $this->addFlash(
@@ -123,8 +126,9 @@ class ProfileController extends AbstractController
     }
 
     #[Route(path: '/profile/delete', name: 'profile.delete')]
-    public function delete(Request $request): Response
+    public function delete(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, TokenStorageInterface $tokenStorage): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
 
 
@@ -133,10 +137,132 @@ class ProfileController extends AbstractController
         $deleteForm->handleRequest($request);
 
         if ($deleteForm->isSubmitted() && $deleteForm->isValid()) {
-            // logique de suppression
+            $password = $deleteForm->get('password')->getData();
+            $passwordConfirm = $deleteForm->get('passwordConfirm')->getData();
+
+            if ($password !== $passwordConfirm) {
+                $this->addFlash('danger', "The passwords aren't the same");
+                return $this->redirectToRoute('profile.delete');
+            }
+
+            if (!$passwordHasher->isPasswordValid($user, $password)) {
+                $this->addFlash(
+                    'danger',
+                    'Incorrect password...'
+                );
+                return $this->redirectToRoute('profile.delete');
+            }
+
+            try {
+                $tokenStorage->setToken(null);
+                $em->remove($user);
+                $em->flush();
+                $this->addFlash(
+                    'success',
+                    'Account deleted!'
+                );
+                return $this->redirectToRoute('signup');
+            } catch (Exception $e) {
+                $this->addFlash(
+                    'danger',
+                    'Error when trying to delete the account...'
+                );
+                return $this->redirectToRoute('profile.delete');
+            }
         }
         return $this->render('profile/delete.html.twig', [
             'deleteForm' => $deleteForm
         ]);
+    }
+
+    #[Route(path: '/profile/threads', name: 'profile.threads')]
+    public function threads()
+    {
+        return $this->render('profile/threads/index.html.twig');
+    }
+
+
+    #[Route('/profile/thread/{id}/edit', name: "threads.edit", requirements: ['id' => '\d+'])]
+    public function editThread(Request $request, int $id, ThreadRepository $threadRepository, EntityManagerInterface $em,  HtmlSanitizerInterface $htmlSanitizer): Response
+    {
+
+        $thread = $threadRepository->find($id);
+        $form = $this->createForm(ThreadType::class, $thread);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $thread->setUpdatedAt(new \DateTimeImmutable());
+            $sanitizedContent =  $htmlSanitizer->sanitize($form->get('content')->getData());
+            $thread->setContent($sanitizedContent);
+            $thread->setTitle($form->get('title')->getData());
+            $thread->setDescription($form->get('description')->getData());
+
+            $categories = $form->get('categories')->getData();
+
+            foreach ($categories as $category) {
+                $thread->addCategory($category);
+            }
+
+            $em->persist($thread);
+            $em->flush();
+
+            $this->addFlash('success', 'Thread successfully updated');
+
+            return $this->redirectToRoute('profile.threads');
+        }
+
+        return $this->render('profile/threads/edit.html.twig', [
+            'thread' => $thread,
+            'form' => $form
+        ]);
+    }
+    #[Route('/profile/thread/{id}/delete', name: "threads.delete", requirements: ['id' => '\d+'])]
+    public function deleteThread(Request $request, int $id, ThreadRepository $threadRepository, EntityManagerInterface $em): Response
+    {
+
+        $thread = $threadRepository->find($id);
+        $form = $this->createForm(DeleteThreadType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $confirmation = $form->get('confirmation')->getData();
+
+            if ($confirmation !== "Yes, delete my thread") {
+                $this->addFlash('danger', 'Please enter the correct sentence to confirm the deletion of the thread');
+                return $this->redirectToRoute("threads.delete", ['id' => $thread->getId()]);
+            }
+
+
+            foreach ($thread->getCategories() as $category) {
+                $thread->removeCategory($category);
+            }
+
+            foreach ($thread->getComments() as $comment) {
+                $em->remove($comment);
+            }
+
+            // il faut bien flush une première pour supprimer les entrées des autres tables associées au thread avant d'essayer de supprimer le thread sinon on a le problème des foreign keys. 
+            $em->flush();
+
+            $em->remove($thread);
+            $em->flush();
+
+            $this->addFlash('success', 'Thread successfully deleted');
+
+            return $this->redirectToRoute('profile.threads');
+        }
+
+        return $this->render('profile/threads/delete.html.twig', [
+            'thread' => $thread,
+            'form' => $form
+        ]);
+    }
+
+    #[Route(path: '/profile/comments', name: 'profile.comments')]
+    public function comments()
+    {
+        return $this->render('profile/comments/index.html.twig');
     }
 }
