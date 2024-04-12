@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
+block body %} {% include "partials/flash.html.twig" %}
+
+<h1>Mark a solution for the thread</h1>
+
+<p>For the thread: {{ thread.title }}</p>
+
+<form action="#" method="POST">
+  <label class="form-label" for="comment">Select a comment:</label>
+  <select class="form-select mb-4" name="comment" id="comment">
+    {% for comment in thread.comments %}
+    <option value="{{ comment.id }}">{{ comment.content }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary btn-sm">Mark as solution</button>
+</form>
+
+{% endblock %}

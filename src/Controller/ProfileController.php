@@ -374,4 +374,48 @@ class ProfileController extends AbstractController
             'form' => $form
         ]);
     }
+
+
+    #[Route('/profile/thread/{id}/mark-solution', name: 'profile.thread.solution', requirements: ['id' => '\d+'])]
+    public function threadSolution(Request $request, EntityManagerInterface $em, int $id, ThreadRepository $threadRepository, CommentRepository $commentRepository)
+    {
+        $thread = $threadRepository->find($id);
+
+        if ($request->isMethod('POST')) {
+            $commentId = $request->get('comment');
+
+            $commentSelected = $commentRepository->find($commentId);
+
+            $commentSelected->setSolution(true);
+            $thread->setStatus('closed');
+            $em->flush();
+            $this->addFlash('success', 'A solution is now set on that thread');
+            return $this->redirectToRoute('threads.show', ["id" => $id]);
+        }
+
+        if (!$thread) {
+            $this->addFlash('danger', 'The thread requested does not exists');
+            return $this->redirectToRoute('threads');
+        }
+
+        /** @var User */
+        $user = $this->getUser();
+        if ($thread->getAuthor()->getId() !== $user->getId()) {
+            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+            return $this->redirectToRoute('threads.show', ['id' => $id]);
+        }
+
+        $existingSolution = $commentRepository->findBy([
+            "isSolution" => true
+        ]);
+
+        if ($existingSolution) {
+            $this->addFlash('warning', 'There is already a solution for that thread.');
+            return $this->redirectToRoute('threads.show', ['id' => $id]);
+        }
+
+        return $this->render('profile/threads/solution.html.twig', [
+            'thread' => $thread
+        ]);
+    }
 }

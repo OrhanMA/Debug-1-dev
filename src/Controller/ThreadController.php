@@ -21,9 +21,7 @@ class ThreadController extends AbstractController
     $threadRepository): Response
     {
 
-        $threads = $threadRepository->findBy([
-            'status' => 'open'
-        ]);
+        $threads = $threadRepository->findAll();
 
         return $this->render('threads/index.html.twig', [
             'threads' => $threads

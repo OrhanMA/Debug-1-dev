@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
-block body %} {% include "partials/flash.html.twig" %}
+block body %} {% include "partials/flash.html.twig" %} {% set sortedComments =
+thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
 
 <h1>{{ thread.title }}</h1>
 {% if is_granted('IS_AUTHENTICATED_FULLY') and thread.author.id == app.user.id
@@ -52,7 +53,15 @@ block body %} {% include "partials/flash.html.twig" %}
   {{ thread.content | nl2br }}
 </p>
 
-{% if is_granted('IS_AUTHENTICATED_FULLY') %}
+{% if is_granted('IS_AUTHENTICATED_FULLY') %} {% if thread.author.id ==
+app.user.id and thread.status == "open" %}
+<a
+  href="{{ path('profile.thread.solution', { id: thread.id }) }}"
+  class="btn btn-success mb-4"
+  >Declare a solution</a
+>
+{% endif %}
+
 <div class="mb-2">
   <h4>Post a comment</h4>
   {{ form_start(form) }}
@@ -73,9 +82,8 @@ block body %} {% include "partials/flash.html.twig" %}
     </p>
   </div>
   {% endif %} {% endfor %}
-
   <h4>Comments:</h4>
-  {% for comment in thread.comments %} {% if comment.isSolution != true %}
+  {% for comment in sortedComments %} {% if comment.isSolution != true %}
   <div class="border p-4 m-4">
     <h5>
       <a
