@@ -5,6 +5,7 @@ namespace App\Controller;
 use Exception;
 use App\Entity\User;
 use App\Form\UserType;
+use App\Entity\Comment;
 use App\Form\ThreadType;
 use App\Form\CommentType;
 use App\Form\NewPasswordType;
@@ -294,6 +295,7 @@ class ProfileController extends AbstractController
         return $this->render('profile/comments/index.html.twig');
     }
 
+
     #[Route('/profile/comment/{id}/edit', name: "comments.edit", requirements: ['id' => '\d+'])]
     public function editComment(Request $request, int $id, CommentRepository $commentRepository, EntityManagerInterface $em,  HtmlSanitizerInterface $htmlSanitizer): Response
     {
@@ -417,5 +419,45 @@ class ProfileController extends AbstractController
         return $this->render('profile/threads/solution.html.twig', [
             'thread' => $thread
         ]);
+    }
+
+
+    #[Route('profile/solution/{id}/delete', name: 'profile.solution.delete', requirements: ['id' => '\d+'])]
+    public function deleteSolution(Request $request, int $id, CommentRepository $commentRepository, EntityManagerInterface $em)
+    {
+
+
+        $comment = $commentRepository->find($id);
+
+        if (!$comment) {
+            $this->addFlash('danger', "The ressource you try to access does not exists.");
+            return $this->redirectToRoute("threads");
+        }
+
+        if ($comment->getUser() !== $this->getUser()) {
+            $this->addFlash('danger', "You have been redirected here because you're not authorized to access that route");
+            return $this->redirectToRoute("threads.show", ['id' => $comment->getThread()->getId()]);
+        }
+
+        if ($request->isMethod('POST')) {
+            $confirmation = $request->get('confirm');
+
+
+
+            if ($confirmation === 'yes') {
+                $comment->setSolution(false);
+                $comment->getThread()->setStatus('open');
+                $this->addFlash('success', 'The comment is no longer a solution for that thread.');
+            } else {
+                $comment->setSolution(true);
+                $this->addFlash('warning', 'No changes have been made. The solution remains the same for that thread.');
+            }
+
+            $em->flush();
+            return $this->redirectToRoute('threads.show', ['id' => $comment->getThread()->getId()]);
+        }
+
+
+        return $this->render('profile/comments/solution/delete.html.twig', ['comment' => $comment]);
     }
 }

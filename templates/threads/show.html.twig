@@ -54,7 +54,7 @@ thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
 </p>
 
 {% if is_granted('IS_AUTHENTICATED_FULLY') %} {% if thread.author.id ==
-app.user.id and thread.status == "open" %}
+app.user.id and thread.status == "open" and thread.comments|length > 0 %}
 <a
   href="{{ path('profile.thread.solution', { id: thread.id }) }}"
   class="btn btn-success mb-4"
@@ -75,6 +75,11 @@ app.user.id and thread.status == "open" %}
   {% if thread.comments and thread.comments|length > 0 %} {% for comment in
   thread.comments %} {% if comment.isSolution == true %}
   <h3 class="text-success">Solution</h3>
+  <a
+    href="{{ path('profile.solution.delete', { id: comment.id }) }}"
+    class="btn btn-danger btn-sm"
+    >Remove solution</a
+  >
   <div class="border p-4 m-4 bg-success text-white">
     <p>{{ comment.user.username }} commented:</p>
     <p>
