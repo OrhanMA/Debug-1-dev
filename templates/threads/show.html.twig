@@ -1,124 +1,168 @@
 {% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
 block body %} {% include "partials/flash.html.twig" %} {% set sortedComments =
 thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
-
-<h1>{{ thread.title }}</h1>
-{% if is_granted('IS_AUTHENTICATED_FULLY') and thread.author.id == app.user.id
-%}
-<div class="mb-4">
-  <a
-    class="btn btn-primary btn-sm"
-    href="{{ path('threads.edit', { id: thread.id }) }}"
-    >Edit thread</a
-  >
-  <a
-    class="btn btn-danger btn-sm"
-    href="{{ path('threads.delete', { id: thread.id }) }}"
-    >Delete thread</a
-  >
-</div>
-{% endif %}
-
-<p>
-  Posted by
-  <a
-    class="no-hover-link"
-    href="{{ path('profile.public', { id: thread.author.id }) }}"
-  >
-    {{ thread.author.username }}
-  </a>
-  on
-  {{ thread.createdAt|date('M. d Y') }}
-  {% if thread.createdAt != thread.updatedAt and thread.updatedAt != null %}
-  {{ thread.updatedAt|date('M. d Y H:m') }}
-  {% endif %}
-</p>
-
-<div class="d-flex gap-2 mb-4 mt-2">
-  {% for category in thread.categories %}
-  <span class="badge bg-info text-white badge-info">{{ category.name }}</span>
-  {% endfor %}
-</div>
-
-<p>
-  Status:
-  <span class="text-info">
-    {{ thread.status }}
-  </span>
-</p>
-
-<p class="mb-4">Description: {{ thread.description | nl2br }}</p>
-<h2>Content:</h2>
-<p class="mb-5">
-  {{ thread.content | nl2br }}
-</p>
-
-{% if is_granted('IS_AUTHENTICATED_FULLY') %} {% if thread.author.id ==
-app.user.id and thread.status == "open" and thread.comments|length > 0 %}
-<a
-  href="{{ path('profile.thread.solution', { id: thread.id }) }}"
-  class="btn btn-success mb-4"
-  >Declare a solution</a
->
-{% endif %}
-
-<div class="mb-2">
-  <h4>Post a comment</h4>
-  {{ form_start(form) }}
-  {{ form_row(form.content) }}
-  <button type="submit" class="btn btn-primary">Send</button>
-  {{ form_end(form) }}
-</div>
-{% endif %}
-
-<div>
-  {% if thread.comments and thread.comments|length > 0 %} {% for comment in
-  thread.comments %} {% if comment.isSolution == true %}
-  <h3 class="text-success">Solution</h3>
-  <a
-    href="{{ path('profile.solution.delete', { id: comment.id }) }}"
-    class="btn btn-danger btn-sm"
-    >Remove solution</a
-  >
-  <div class="border p-4 m-4 bg-success text-white">
-    <p>{{ comment.user.username }} commented:</p>
-    <p>
-      {{ comment.content | nl2br }}
-    </p>
-  </div>
-  {% endif %} {% endfor %}
-  <h4>Comments:</h4>
-  {% for comment in sortedComments %} {% if comment.isSolution != true %}
-  <div class="border p-4 m-4">
-    <h5>
-      <a
-        class="no-hover-link"
-        href="{{ path('profile.public', { id: comment.user.id }) }}"
+{{ dump(vote) }}
+<div class="d-flex gap-4">
+  <div class="border-end border-light-subtle pe-4 d-flex flex-column mt-4">
+    {% if is_granted('IS_AUTHENTICATED_FULLY')%} {% if app.user == thread.author
+    %}
+    <div class="d-flex flex-column">
+      {% include "partials/carets/caret-up-disabled.html.twig" %} {% include
+      "partials/carets/caret-down-disabled.html.twig" %}
+    </div>
+    {% else %} {% if vote == null %}
+    <div class="d-flex flex-column">
+      <form
+        method="POST"
+        action="{{ path('vote.thread.up', { id: thread.id }) }}"
       >
-        {{ comment.user.username }}
-      </a>
-      commented:
-    </h5>
-    <p>
-      {{ comment.content | nl2br }}
-    </p>
-    {% if comment.user.id == app.user.id %}
-    <div class="mt-2">
-      <a
-        class="btn btn-primary btn-sm"
-        href="{{ path('comments.edit', { id: comment.id }) }}"
-        >Edit</a
-      >
-      <a
-        class="btn btn-danger btn-sm"
-        href="{{ path('comments.delete', { id: comment.id }) }}"
-        >Delete</a
-      >
+        <input type="text" name="vote" id="vote" value="up" hidden />
+        <button type="submit" class="btn">
+          {% include "partials/carets/caret-up.html.twig" %}
+        </button>
+      </form>
+      {% include "partials/carets/caret-down.html.twig" %}
+    </div>
+    {% elseif vote.isLike == true %}
+    <div class="d-flex flex-column">
+      {% include "partials/carets/caret-up-fill.html.twig" %} {% include
+      "partials/carets/caret-down.html.twig" %}
+    </div>
+    {% else %}
+    <div class="d-flex flex-column">
+      {% include "partials/carets/caret-up.html.twig" %} {% include
+      "partials/carets/caret-down-fill.html.twig" %}
+    </div>
+    {% endif %} {% endif %} {% else %}
+    <div class="d-flex flex-column">
+      {% include "partials/carets/caret-up-disabled.html.twig" %} {% include
+      "partials/carets/caret-down-disabled.html.twig" %}
     </div>
     {% endif %}
   </div>
-  {% endif %} {% endfor %} {% else %}
-  <h4>0 comments posted:</h4>
-  {% endif %}
+
+  <div>
+    <h1>{{ thread.title }}</h1>
+    {% if is_granted('IS_AUTHENTICATED_FULLY') and thread.author.id ==
+    app.user.id %}
+    <div class="mb-4">
+      <a
+        class="btn btn-primary btn-sm"
+        href="{{ path('threads.edit', { id: thread.id }) }}"
+        >Edit thread</a
+      >
+      <a
+        class="btn btn-danger btn-sm"
+        href="{{ path('threads.delete', { id: thread.id }) }}"
+        >Delete thread</a
+      >
+    </div>
+    {% endif %}
+
+    <p>
+      Posted by
+      <a
+        class="no-hover-link"
+        href="{{ path('profile.public', { id: thread.author.id }) }}"
+      >
+        {{ thread.author.username }}
+      </a>
+      on
+      {{ thread.createdAt|date('M. d Y') }}
+      {% if thread.createdAt != thread.updatedAt and thread.updatedAt != null %}
+      {{ thread.updatedAt|date('M. d Y H:m') }}
+      {% endif %}
+    </p>
+
+    <div class="d-flex gap-2 mb-4 mt-2">
+      {% for category in thread.categories %}
+      <span class="badge bg-info text-white badge-info">{{
+        category.name
+      }}</span>
+      {% endfor %}
+    </div>
+
+    <p>
+      Status:
+      <span class="text-info">
+        {{ thread.status }}
+      </span>
+    </p>
+
+    <p class="mb-4">Description: {{ thread.description | nl2br }}</p>
+    <h2>Content:</h2>
+    <p class="mb-5">
+      {{ thread.content | nl2br }}
+    </p>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %} {% if thread.author.id ==
+    app.user.id and thread.status == "open" and thread.comments|length > 0 %}
+    <a
+      href="{{ path('profile.thread.solution', { id: thread.id }) }}"
+      class="btn btn-success mb-4"
+      >Declare a solution</a
+    >
+    {% endif %}
+
+    <div class="mb-2">
+      <h4>Post a comment</h4>
+      {{ form_start(form) }}
+      {{ form_row(form.content) }}
+      <button type="submit" class="btn btn-primary">Send</button>
+      {{ form_end(form) }}
+    </div>
+    {% endif %}
+
+    <div>
+      {% if thread.comments and thread.comments|length > 0 %} {% for comment in
+      thread.comments %} {% if comment.isSolution == true %}
+      <h3 class="text-success">Solution</h3>
+      <a
+        href="{{ path('profile.solution.delete', { id: comment.id }) }}"
+        class="btn btn-danger btn-sm"
+        >Remove solution</a
+      >
+      <div class="border p-4 m-4 bg-success text-white">
+        <p>{{ comment.user.username }} commented:</p>
+        <p>
+          {{ comment.content | nl2br }}
+        </p>
+      </div>
+      {% endif %} {% endfor %}
+      <h4>Comments:</h4>
+      {% for comment in sortedComments %} {% if comment.isSolution != true %}
+      <div class="border p-4 m-4">
+        <h5>
+          <a
+            class="no-hover-link"
+            href="{{ path('profile.public', { id: comment.user.id }) }}"
+          >
+            {{ comment.user.username }}
+          </a>
+          commented:
+        </h5>
+        <p>
+          {{ comment.content | nl2br }}
+        </p>
+        {% if app.user and comment.user.id == app.user.id %}
+        <div class="mt-2">
+          <a
+            class="btn btn-primary btn-sm"
+            href="{{ path('comments.edit', { id: comment.id }) }}"
+            >Edit</a
+          >
+          <a
+            class="btn btn-danger btn-sm"
+            href="{{ path('comments.delete', { id: comment.id }) }}"
+            >Delete</a
+          >
+        </div>
+        {% endif %}
+      </div>
+      {% endif %} {% endfor %} {% else %}
+      <h4>0 comments posted:</h4>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

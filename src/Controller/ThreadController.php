@@ -7,6 +7,7 @@ use App\Entity\Thread;
 use App\Form\CommentType;
 use App\Form\ThreadType;
 use App\Repository\ThreadRepository;
+use App\Repository\VoteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,8 +31,21 @@ class ThreadController extends AbstractController
 
 
     #[Route('/threads/{id}', name: 'threads.show', requirements: ['id' => '\d+'])]
-    public function show(int $id, ThreadRepository $threadRepository, Request $request, EntityManagerInterface $em, HtmlSanitizerInterface $htmlSanitizer): Response
+    public function show(int $id, ThreadRepository $threadRepository, Request $request, EntityManagerInterface $em, HtmlSanitizerInterface $htmlSanitizer, VoteRepository $voteRepository): Response
     {
+        /** @var User */
+        $user = $this->getUser();
+
+        $vote = null;
+        // récupère le vote d'un user  si il existe
+        if ($user) {
+            $vote = $voteRepository->findOneBy([
+                'thread' => $id,
+                'user' => $user->getId()
+
+            ]);
+        }
+
         $thread = $threadRepository->find($id);
 
         $form = $this->createForm(CommentType::class);
@@ -61,9 +75,11 @@ class ThreadController extends AbstractController
             }
         }
 
+
         return $this->render('threads/show.html.twig', [
             'thread' => $thread,
-            'form' => $form
+            'form' => $form,
+            'vote' => $vote
         ]);
     }
 

@@ -53,11 +53,20 @@ class Thread
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'thread', orphanRemoval: true)]
     private Collection $comments;
 
+    /**
+     * @var Collection<int, Vote>
+     */
+    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'thread', cascade: ['persist'])]
+    private Collection $votes;
+
+
+
     public function __construct()
     {
         $this->categories = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->status = 'open';
+        $this->votes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -228,5 +237,34 @@ class Thread
             }
         }
         return null;
+    }
+
+    /**
+     * @return Collection<int, Vote>
+     */
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
+
+    public function addVote(Vote $vote): static
+    {
+        if (!$this->votes->contains($vote)) {
+            $this->votes->add($vote);
+            $vote->setThread($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVote(Vote $vote): static
+    {
+        if ($this->votes->removeElement($vote)) {
+            if ($vote->getThread() === $this) {
+                $vote->setThread(null);
+            }
+        }
+
+        return $this;
     }
 }
