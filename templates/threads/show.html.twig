@@ -1,9 +1,29 @@
 {% extends 'base.html.twig' %} {% block title %} Thread show {% endblock %}{%
 block body %} {% include "partials/flash.html.twig" %} {% set sortedComments =
-thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
-{{ dump(vote) }}
+thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %} {% set
+likesCount = thread.votes|filter(vote => vote.isLike == true) %} {% set
+dislikesCount = thread.votes|filter(vote => vote.isLike == false) %} {% set
+likeDisplay = likesCount|length - dislikesCount|length %} {#
+{{ dump(likesCount | length) }}
+{{ dump(dislikesCount | length) }}
+{{ dump(likeDisplay) }} #}
 <div class="d-flex gap-4">
-  <div class="border-end border-light-subtle pe-4 d-flex flex-column mt-4">
+  <div
+    class="sidebar border-end border-light-subtle pe-4 d-flex flex-column mt-4"
+  >
+    <span
+      class="align-middle {{
+        likeDisplay == 0
+          ? 'text-dark'
+          : likeDisplay > 0
+          ? 'text-success'
+          : 'text-danger'
+      }}"
+    >
+      {% if likeDisplay > 0 %} + {% endif %}
+
+      {{ likeDisplay }}
+    </span>
     {% if is_granted('IS_AUTHENTICATED_FULLY')%} {% if app.user == thread.author
     %}
     <div class="d-flex flex-column">
@@ -14,24 +34,71 @@ thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
     <div class="d-flex flex-column">
       <form
         method="POST"
-        action="{{ path('vote.thread.up', { id: thread.id }) }}"
+        class="m-0"
+        action="{{ path('vote.thread', { id: thread.id }) }}"
       >
         <input type="text" name="vote" id="vote" value="up" hidden />
         <button type="submit" class="btn">
           {% include "partials/carets/caret-up.html.twig" %}
         </button>
       </form>
-      {% include "partials/carets/caret-down.html.twig" %}
+
+      <form
+        method="POST"
+        class="m-0"
+        action="{{ path('vote.thread', { id: thread.id }) }}"
+      >
+        <input type="text" name="vote" id="vote" value="down" hidden />
+        <button type="submit" class="btn">
+          {% include "partials/carets/caret-down.html.twig" %}
+        </button>
+      </form>
     </div>
     {% elseif vote.isLike == true %}
     <div class="d-flex flex-column">
-      {% include "partials/carets/caret-up-fill.html.twig" %} {% include
-      "partials/carets/caret-down.html.twig" %}
+      <form
+        method="POST"
+        class="m-0"
+        action="{{ path('vote.thread', { id: thread.id }) }}"
+      >
+        <input type="text" name="vote" id="vote" value="up" hidden />
+        <button type="submit" class="btn">
+          {% include "partials/carets/caret-up-fill.html.twig" %}
+        </button>
+      </form>
+      <form
+        method="POST"
+        class="m-0"
+        action="{{ path('vote.thread', { id: thread.id }) }}"
+      >
+        <input type="text" name="vote" id="vote" value="down" hidden />
+        <button type="submit" class="btn">
+          {% include "partials/carets/caret-down.html.twig" %}
+        </button>
+      </form>
     </div>
     {% else %}
     <div class="d-flex flex-column">
-      {% include "partials/carets/caret-up.html.twig" %} {% include
-      "partials/carets/caret-down-fill.html.twig" %}
+      <form
+        method="POST"
+        class="m-0"
+        action="{{ path('vote.thread', { id: thread.id }) }}"
+      >
+        <input type="text" name="vote" id="vote" value="up" hidden />
+        <button type="submit" class="btn">
+          {% include "partials/carets/caret-up.html.twig" %}
+        </button>
+      </form>
+      <form
+        method="POST"
+        class="m-0"
+        action="{{ path('vote.thread', { id: thread.id }) }}"
+      >
+        <input type="text" name="vote" id="vote" value="down" hidden />
+        <button type="submit" class="btn">
+          {% include "partials/carets/caret-down-fill.html.twig" %}
+        </button>
+      </form>
     </div>
     {% endif %} {% endif %} {% else %}
     <div class="d-flex flex-column">
@@ -44,7 +111,7 @@ thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
   <div>
     <h1>{{ thread.title }}</h1>
     {% if is_granted('IS_AUTHENTICATED_FULLY') and thread.author.id ==
-    app.user.id %}
+    app.user.id or is_granted('ROLE_ADMIN') %}
     <div class="mb-4">
       <a
         class="btn btn-primary btn-sm"
@@ -96,7 +163,7 @@ thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
     </p>
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %} {% if thread.author.id ==
-    app.user.id and thread.status == "open" and thread.comments|length > 0 %}
+    app.user.id and thread.status == "open" and thread.comments|length > 0 or is_granted('ROLE_ADMIN') %}
     <a
       href="{{ path('profile.thread.solution', { id: thread.id }) }}"
       class="btn btn-success mb-4"
@@ -131,31 +198,110 @@ thread.comments|sort((a, b) => a.createdAt > b.createdAt ? -1 : 1) %}
       {% endif %} {% endfor %}
       <h4>Comments:</h4>
       {% for comment in sortedComments %} {% if comment.isSolution != true %}
-      <div class="border p-4 m-4">
-        <h5>
-          <a
-            class="no-hover-link"
-            href="{{ path('profile.public', { id: comment.user.id }) }}"
-          >
-            {{ comment.user.username }}
-          </a>
-          commented:
-        </h5>
-        <p>
-          {{ comment.content | nl2br }}
-        </p>
-        {% if app.user and comment.user.id == app.user.id %}
-        <div class="mt-2">
-          <a
-            class="btn btn-primary btn-sm"
-            href="{{ path('comments.edit', { id: comment.id }) }}"
-            >Edit</a
-          >
-          <a
-            class="btn btn-danger btn-sm"
-            href="{{ path('comments.delete', { id: comment.id }) }}"
-            >Delete</a
-          >
+      {% set
+        commentLikesCount = comment.votes|filter(vote => vote.isLike == true) %} {% set
+        commentDislikesCount = comment.votes|filter(vote => vote.isLike == false) %} {% set
+        commentLikeDisplay = commentLikesCount|length - commentDislikesCount|length %}
+        <div class="border d-flex p-4 m-4">
+          {# {{ dump(comment) }} #}
+          <div class="sidebar pe-4">
+          <span
+          class="align-middle {{
+            commentLikeDisplay == 0
+              ? 'text-dark'
+              : commentLikeDisplay > 0
+              ? 'text-success'
+              : 'text-danger'
+          }}"
+        >{{ commentLikeDisplay }}</span>
+          {% set userVote = comment.votes|filter(vote => vote.user.id ==
+            app.user.id)|first%}
+            {# {{ dump(userVote) }} #}
+          {# {{ dump(userVote | length) }} #}
+          {% if is_granted('IS_AUTHENTICATED_FULLY') %} {% if userVote | length
+          > 0 %} 
+          {# Si il a déjà voté #}
+          {% if userVote.isLike == true %}
+          {# Si il a liké #}
+          <form class="m-0" action="{{ path('vote.comment', {id:comment.id}) }}">
+            <input type="text" name="vote" id="vote" value="up" hidden>
+            <button type="submit" class="btn">
+              {% include "partials/carets/caret-up-fill.html.twig" %}
+            </button>
+          </form>
+          <form class="m-0" action="{{ path('vote.comment', {id:comment.id}) }}">
+            <input type="text" name="vote" id="vote" value="down" hidden>
+            <button type="submit" class="btn">
+              {% include "partials/carets/caret-down.html.twig" %}
+            </button>
+          </form>
+          {% else %}
+          <form class="m-0" action="{{ path('vote.comment', {id:comment.id}) }}">
+            <input type="text" name="vote" id="vote" value="up" hidden>
+            <button type="submit" class="btn">
+              {% include "partials/carets/caret-up.html.twig" %}
+            </button>
+          </form>
+          <form class="m-0" action="{{ path('vote.comment', {id:comment.id}) }}">
+            <input type="text" name="vote" id="vote" value="down" hidden>
+            <button type="submit" class="btn">
+              {% include "partials/carets/caret-down-fill.html.twig" %}
+            </button>
+          </form>       
+          {% endif %} 
+       {% else %}
+          <div class="d-flex flex-column">
+            {# Jamais voté #}
+            <form class="m-0" action="{{ path('vote.comment', {id:comment.id}) }}">
+              <input type="text" name="vote" id="vote" value="up" hidden>
+              <button type="submit" class="btn">
+                {% include "partials/carets/caret-up.html.twig" %}
+              </button>
+            </form>
+            <form class="m-0" action="{{ path('vote.comment', {id:comment.id}) }}">
+              <input type="text" name="vote" id="vote" value="down" hidden>
+              <button type="submit" class="btn">
+               
+                {% include "partials/carets/caret-down.html.twig" %}
+              </button>
+            </form>
+          </div>
+
+          {% endif %} {% else %} {# Si user pas connecté #}
+          <a href="{{ path('signin') }}">
+          <div class="d-flex flex-column">
+              {% include "partials/carets/caret-up-disabled.html.twig" %} {%
+                include "partials/carets/caret-down-disabled.html.twig" %}
+              </div>
+            </a>
+          {% endif %}
+        </div>
+        <div>
+          <h5>
+            <a
+              class="no-hover-link"
+              href="{{ path('profile.public', { id: comment.user.id }) }}"
+            >
+              {{ comment.user.username }}
+            </a>
+            commented:
+          </h5>
+          <p>
+            {{ comment.content | nl2br }}
+          </p>
+          {% if app.user and comment.user.id == app.user.id or is_granted('ROLE_ADMIN') %}
+          <div class="mt-2">
+            <a
+              class="btn btn-primary btn-sm"
+              href="{{ path('comments.edit', { id: comment.id }) }}"
+              >Edit</a
+            >
+            <a
+              class="btn btn-danger btn-sm"
+              href="{{ path('comments.delete', { id: comment.id }) }}"
+              >Delete</a
+            >
+          </div>
         </div>
         {% endif %}
       </div>

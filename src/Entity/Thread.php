@@ -56,7 +56,7 @@ class Thread
     /**
      * @var Collection<int, Vote>
      */
-    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'thread', cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'thread', cascade: ['persist', 'remove'])]
     private Collection $votes;
 
 

@@ -199,10 +199,15 @@ class ProfileController extends AbstractController
 
         /** @var User */
         $user = $this->getUser();
-        if ($thread->getAuthor()->getId() !== $user->getId()) {
-            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
-            return $this->redirectToRoute('threads');
+        $hasAccess = in_array('ROLE_ADMIN', $user->getRoles());
+
+        if (!$hasAccess) {
+            if ($thread->getAuthor()->getId() !== $user->getId()) {
+                $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+                return $this->redirectToRoute('threads');
+            }
         }
+
         $form = $this->createForm(ThreadType::class, $thread);
 
         $form->handleRequest($request);
@@ -246,9 +251,13 @@ class ProfileController extends AbstractController
 
         /** @var User */
         $user = $this->getUser();
-        if ($thread->getAuthor()->getId() !== $user->getId()) {
-            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
-            return $this->redirectToRoute('threads');
+        $hasAccess = in_array('ROLE_ADMIN', $user->getRoles());
+
+        if (!$hasAccess) {
+            if ($thread->getAuthor()->getId() !== $user->getId()) {
+                $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+                return $this->redirectToRoute('threads');
+            }
         }
 
         $form = $this->createForm(DeleteThreadType::class);
@@ -308,9 +317,13 @@ class ProfileController extends AbstractController
 
         /** @var User */
         $user = $this->getUser();
-        if ($comment->getUser()->getId() !== $user->getId()) {
-            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
-            return $this->redirectToRoute('threads');
+        $hasAccess = in_array('ROLE_ADMIN', $user->getRoles());
+
+        if (!$hasAccess) {
+            if ($comment->getUser()->getId() !== $user->getId()) {
+                $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+                return $this->redirectToRoute('threads');
+            }
         }
         $form = $this->createForm(CommentType::class, $comment);
 
@@ -347,9 +360,13 @@ class ProfileController extends AbstractController
         }
         /** @var User */
         $user = $this->getUser();
-        if ($comment->getUser()->getId() !== $user->getId()) {
-            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
-            return $this->redirectToRoute('threads');
+        $hasAccess = in_array('ROLE_ADMIN', $user->getRoles());
+
+        if (!$hasAccess) {
+            if ($comment->getUser()->getId() !== $user->getId()) {
+                $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+                return $this->redirectToRoute('threads');
+            }
         }
         $form = $this->createForm(DeleteCommentType::class);
         $form->handleRequest($request);
@@ -402,9 +419,13 @@ class ProfileController extends AbstractController
 
         /** @var User */
         $user = $this->getUser();
-        if ($thread->getAuthor()->getId() !== $user->getId()) {
-            $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
-            return $this->redirectToRoute('threads.show', ['id' => $id]);
+        $hasAccess = in_array('ROLE_ADMIN', $user->getRoles());
+
+        if (!$hasAccess) {
+            if ($thread->getAuthor()->getId() !== $user->getId()) {
+                $this->addFlash('warning', 'You have been redirected here because you are not authorized to access the page you requested.');
+                return $this->redirectToRoute('threads.show', ['id' => $id]);
+            }
         }
 
         $existingSolution = $commentRepository->findBy([
@@ -434,9 +455,12 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute("threads");
         }
 
-        if ($comment->getUser() !== $this->getUser()) {
-            $this->addFlash('danger', "You have been redirected here because you're not authorized to access that route");
-            return $this->redirectToRoute("threads.show", ['id' => $comment->getThread()->getId()]);
+        $hasAccess = in_array('ROLE_ADMIN', $this->getUser()->getRoles());
+        if (!$hasAccess) {
+            if ($comment->getUser() !== $this->getUser()) {
+                $this->addFlash('danger', "You have been redirected here because you're not authorized to access that route");
+                return $this->redirectToRoute("threads.show", ['id' => $comment->getThread()->getId()]);
+            }
         }
 
         if ($request->isMethod('POST')) {

@@ -30,3 +30,9 @@ form {
 #comment_content {
   min-height: 150px;
 }
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
