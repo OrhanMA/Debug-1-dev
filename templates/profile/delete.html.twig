@@ -2,11 +2,10 @@
 {% block body %} {% include "partials/flash.html.twig" %}
 
 <h1>Delete my account</h1>
-
-<p class="text-danger mb-4">
-  Are you sure that you want to delete your account? <br />
+<h2>Are you sure that you want to delete your account?</h2>
+<h3 class="text-danger mb-4">
   That action is destructive and your data can't be retrieved afterwards.
-</p>
+</h3>
 
 <p>Type your password to delete your account:</p>
 {{ form_start(deleteForm) }}

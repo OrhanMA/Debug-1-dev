@@ -11,7 +11,12 @@ p {
   margin-bottom: 0;
 }
 
-form {
+h4 {
+  margin-bottom: 0rem;
+}
+
+form,
+.signup {
   margin: 2rem 0rem;
 }
 
@@ -29,6 +34,7 @@ form {
 
 #comment_content {
   min-height: 150px;
+  background-color: #f8f9fa;
 }
 
 .sidebar {

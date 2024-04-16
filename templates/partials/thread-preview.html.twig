@@ -1,0 +1,36 @@
+<div class="d-flex flex-column bg-light-subtle border p-4 m-4">
+  <a
+    href="{{ path('threads.show', { id: thread.id }) }}"
+    class="text-dark mb-2 link-underline-light text-lg"
+  >
+    <h4 class="text-truncate">
+      {{ thread.title }}
+    </h4>
+  </a>
+  <p
+    class="d-inline-block text-truncate pt-2 pb-2 mb-2 border-bottom border-light-subtle"
+  >
+    Description: {{ thread.description }}
+  </p>
+  <span class="mb-2">
+    posted by
+    <a
+      class="no-hover-link text-warning"
+      href="{{ path('profile.public', { id: thread.author.id }) }}"
+    >
+      {% if app.user and app.user.id == thread.author.id %} you {% else %}
+
+      {{ thread.author.username }}
+
+      {% endif %}
+    </a>
+    on {{ thread.createdAt|date('M. d Y') }}
+  </span>
+  <div class="d-flex gap-2">
+    {% for category in thread.categories %}
+    <span class="badge bg-dark text-white p-2 badge-info">{{
+      category.name
+    }}</span>
+    {% endfor %}
+  </div>
+</div>

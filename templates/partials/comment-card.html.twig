@@ -1,9 +1,3 @@
-{% extends 'base.html.twig' %} {% block title %} My comments {% endblock %}{%
-block body %} {% include "partials/flash.html.twig" %} {% if
-app.user.comments|length == 0 %}
-<h1>No comments posted yet</h1>
-<a class="btn btn-primary" href="{{ path('threads') }}">See threads</a>
-{% endif %} {% for comment in app.user.comments %}
 <div class="border bg-light p-4 m-4">
   <p class="text-truncate mb-4">
     <span class="fw-bold"> On the post: </span>
@@ -26,6 +20,7 @@ app.user.comments|length == 0 %}
       class="btn btn-dark btn-sm"
       >see original post
     </a>
+    {% if app.user and comment.user.id == app.user.id %}
     <a
       class="btn btn-warning btn-sm"
       href="{{ path('comments.edit', { id: comment.id }) }}"
@@ -36,6 +31,7 @@ app.user.comments|length == 0 %}
       href="{{ path('comments.delete', { id: comment.id }) }}"
       >Delete</a
     >
+    {% endif %}
   </div>
   {% if comment.isSolution %}
   <div class="alert alert-success mt-4">
@@ -43,4 +39,3 @@ app.user.comments|length == 0 %}
   </div>
   {% endif %}
 </div>
-{% endfor %} {% endblock %}

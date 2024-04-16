@@ -3,30 +3,30 @@ block body %} {% include "partials/flash.html.twig" %}
 
 <h1>Profile</h1>
 <div class="mb-4">
-  {% if app.user.threads|length > 0 %}
-  <a class="btn btn-primary btn-sm" href="{{ path('profile.threads') }}"
-    >See threads</a
-  >
-  {% endif %} {% if app.user.comments|length > 0 %}
-  <a class="btn btn-primary btn-sm" href="{{ path('profile.comments') }}"
-    >See comments</a
-  >
-  {% endif %}
-  <a class="btn btn-secondary btn-sm" href="{{ path('threads.create') }}"
+  <a class="btn btn-success btn-sm" href="{{ path('threads.create') }}"
     >Create a new thread</a
   >
+  {% if app.user.threads|length > 0 %}
+  <a class="btn btn-warning btn-sm" href="{{ path('profile.threads') }}"
+    >My threads</a
+  >
+  {% endif %} {% if app.user.comments|length > 0 %}
+  <a class="btn btn-secondary btn-sm" href="{{ path('profile.comments') }}"
+    >My comments</a
+  >
+  {% endif %}
 </div>
 <p>Use that form to update your profile:</p>
 {{ form_start(form) }}
 {{ form_row(form.username) }}
 {{ form_row(form.email) }}
-<button class="btn btn-primary" type="submit">Save infos</button>
+<button class="btn btn-success" type="submit">Save infos</button>
 {{ form_end(form) }}
 
 {{ form_start(passwordForm) }}
 {{ form_row(passwordForm.password) }}
 {{ form_row(passwordForm.newPassword) }}
-<button class="btn btn-primary" type="submit">Save new password</button>
+<button class="btn btn-success" type="submit">Save new password</button>
 {{ form_end(passwordForm) }}
 
 <div class="d-inline-block">
