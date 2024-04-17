@@ -1,4 +1,4 @@
-<div class="border bg-light d-flex p-4 m-4">
+<div class="border bg-light d-flex p-4 mb-4">
   {# {{ dump(comment) }} #}
   <div class="sidebar pe-4">
     <span
@@ -94,7 +94,7 @@
     </p>
     {% if app.user and comment.user.id == app.user.id or
     is_granted('ROLE_ADMIN') %}
-    <div class="mt-4">
+    <div class="mt-4 d-flex gap-2">
       <a
         class="btn btn-warning btn-sm"
         href="{{ path('comments.edit', { id: comment.id }) }}"

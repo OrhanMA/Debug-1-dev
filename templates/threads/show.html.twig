@@ -6,7 +6,7 @@ dislikesCount = thread.votes|filter(vote => vote.isLike == false) %} {% set
 likeDisplay = likesCount|length - dislikesCount|length %}
 <div class="d-flex gap-4">
   <div
-    class="sidebar border-end border-light-subtle pe-4 d-flex flex-column mt-4"
+    class="sidebar pe-4 border-end border-light-subtle d-flex flex-column mt-4"
   >
     <span
       class="align-middle {{
@@ -105,27 +105,27 @@ likeDisplay = likesCount|length - dislikesCount|length %}
     {% endif %}
   </div>
 
-  <div>
-    <h1>{{ thread.title }}</h1>
+  <div class="content d-flex flex-column">
+    <h1 class="text-break">{{ thread.title }}</h1>
     {% if is_granted('IS_AUTHENTICATED_FULLY') and thread.author.id ==
     app.user.id or is_granted('ROLE_ADMIN') %}
-    <div class="mb-4">
+    <div class="mb-4 d-flex flex-wrap gap-2">
       <a
         class="btn btn-warning btn-sm"
         href="{{ path('threads.edit', { id: thread.id }) }}"
-        >Edit thread</a
+        >Edit</a
       >
       <a
         class="btn btn-danger btn-sm"
         href="{{ path('threads.delete', { id: thread.id }) }}"
-        >Delete thread</a
+        >Delete</a
       >
       {% if thread.author.id == app.user.id and thread.status == "open" and
       thread.comments|length > 0 or is_granted('ROLE_ADMIN') %}
       <a
         href="{{ path('profile.thread.solution', { id: thread.id }) }}"
         class="btn btn-success btn-sm"
-        >Declare a solution</a
+        >Declare solution</a
       >
       {% endif %}
     </div>
@@ -162,14 +162,15 @@ likeDisplay = likesCount|length - dislikesCount|length %}
       </div>
     </div>
 
-    <p class="mb-2 border-bottom pb-4">
-      Description: {{ thread.description | nl2br }}
-    </p>
+    <div class="mb-2 border-bottom text-break pb-4">
+      <p>Description:</p>
+      {{ thread.description | nl2br }}
+    </div>
     <div class="mb-2 border-bottom pb-4">
       <p class="mb-2">Content:</p>
-      <p class="bg-light p-4">
+      <div class="bg-light p-4 text-break">
         {{ thread.content | nl2br }}
-      </p>
+      </div>
     </div>
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
@@ -206,7 +207,9 @@ likeDisplay = likesCount|length - dislikesCount|length %}
     {% endif %} {% endfor %}
 
     <div>
-      <h4>Comments:</h4>
+      {% if sortedComments|length > 0 %}
+
+      <h4 class="mb-2">Comments:</h4>
       {% for comment in sortedComments %} {% set commentLikesCount =
       comment.votes|filter(vote => vote.isLike == true) %} {% set
       commentDislikesCount = comment.votes|filter(vote => vote.isLike == false)
@@ -217,9 +220,10 @@ likeDisplay = likesCount|length - dislikesCount|length %}
         {% if comment.isSolution != true %} {% include
         "partials/comment.html.twig" %} {% endif %}
       </div>
-      {% endfor %} {#
+      {% endfor %} {% else %}
+
       <h4>0 comments posted:</h4>
-      #}
+      {% endif %}
     </div>
   </div>
 </div>

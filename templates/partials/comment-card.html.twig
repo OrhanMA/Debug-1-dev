@@ -11,14 +11,14 @@
     </a>
   </p>
   <p class="mb-2 fw-bold">you answered:</p>
-  <p>
+  <p class="text-break">
     {{ comment.content | nl2br }}
   </p>
-  <div class="mt-4">
+  <div class="mt-4 d-flex gap-2">
     <a
       href="{{ path('threads.show', { id: comment.thread.id }) }}"
       class="btn btn-dark btn-sm"
-      >see original post
+      >See post
     </a>
     {% if app.user and comment.user.id == app.user.id %}
     <a
