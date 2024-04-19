@@ -62,11 +62,25 @@ Paramétrez la variable DATABASE_URL de votre .env pour la connecter votre base 
 Mettez en place votre base de données
 (si vous avez le CLI Symfony, vous pouvez utiliser symfony console au lieu de php bin/console).
 
+Création de la base de données:
+
 ```bash
 php bin/console doctrine:database:create
+```
+
+Création de la migration **si aucune migration n'est déjà présente dans le projet**
+
+```bash
 php bin/console doctrine:make:migration
+```
+
+Exécution de la migration
+
+```bash
 php bin/console d:m:m
 ```
+
+### Fausses données
 
 Des fausses données ont été créées pour les catégories. Pour les charger, exécutez la commande suivante:
 
@@ -74,12 +88,14 @@ Des fausses données ont été créées pour les catégories. Pour les charger, 
 php bin/console doctrine:fixtures:load
 ```
 
+### Actions administrateur
+
 Un profil adminstrateur a été créé par défaut. Ses identifiants de connexions sont:
 
 - email: admin@admin.com
 - password: admin1234
 
-Démarrer votre serveur local
+### Démarrer votre serveur local
 
 ```bash
 php bin/console server:start
