@@ -74,6 +74,11 @@ Des fausses données ont été créées pour les catégories. Pour les charger, 
 php bin/console doctrine:fixtures:load
 ```
 
+Un profil adminstrateur a été créé par défaut. Ses identifiants de connexions sont:
+
+- email: admin@admin.com
+- password: admin1234
+
 Démarrer votre serveur local
 
 ```bash
