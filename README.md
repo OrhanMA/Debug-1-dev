@@ -47,10 +47,11 @@ Allez dans le projet:
   cd Debug-1-dev
 ```
 
-Install dependencies
+Installer les dépendances:
 
 ```bash
   composer install
+  pnpm install
 ```
 
 Paramétrez la variable DATABASE_URL de votre .env pour la connecter votre base de données
