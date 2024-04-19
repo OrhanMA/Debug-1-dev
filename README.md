@@ -68,6 +68,12 @@ php bin/console doctrine:make:migration
 php bin/console d:m:m
 ```
 
+Des fausses données ont été créées pour les catégories. Pour les charger, exécutez la commande suivante:
+
+```bash
+php bin/console doctrine:fixtures:load
+```
+
 Démarrer votre serveur local
 
 ```bash
@@ -75,3 +81,5 @@ php bin/console server:start
 ```
 
 Rendez-vous sur http://localhost:8000 (ou l'URL donné par votre terminal)
+
+> ⚠️ Pour donner les actions administrateur à un utilisateur, ajoutez-lui le rôle "ROLE_ADMIN" en base de données ⚠️
