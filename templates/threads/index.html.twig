@@ -2,6 +2,11 @@
 body %} {% include "partials/flash.html.twig" %}
 
 <h1>Threads page</h1>
+{% if threads|length > 0 %} {% for thread in threads %} {% include
+"partials/thread-preview.html.twig" %} {% endfor %} {% else %}
 
-{% for thread in threads %} {% include "partials/thread-preview.html.twig" %} {%
-endfor %} {% endblock %}
+<h2>No threads posted yed</h2>
+<a href="{{ path('threads.create') }}" class="btn btn-primary"
+  >Create the first one</a
+>
+{% endif %} {% endblock %}

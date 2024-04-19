@@ -101,10 +101,11 @@ class ThreadController extends AbstractController
             $thread->setTitle($form->get('title')->getData());
             $thread->setDescription($form->get('description')->getData());
 
-            $categories = $form->get('categories')->getData();
-
-            foreach ($categories as $category) {
-                $thread->addCategory($category);
+            if ($form->has('categories')) {
+                $categories = $form->get('categories')->getData();
+                foreach ($categories as $category) {
+                    $thread->addCategory($category);
+                }
             }
 
             $em->persist($thread);
